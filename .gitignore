@@ -1,0 +1,7 @@
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.env
+debtmanager/static/css/output.css
+debtmanager/staticfiles/

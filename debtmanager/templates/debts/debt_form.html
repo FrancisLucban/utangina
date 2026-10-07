@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+
+<div class="max-w-lg mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold mb-4">{{ title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex gap-2 mt-4">
+            <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700">
+                Save
+            </button>
+            <a href="{% url 'dashboard' %}" class="px-4 py-2 rounded border hover:bg-gray-50">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

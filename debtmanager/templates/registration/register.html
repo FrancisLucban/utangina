@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+
+<div class="max-w-sm mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold mb-6">Create an Account</h1>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded p-3">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                {{ field.label }}<span class="text-red-600">*</span>
+            </label>
+
+            {{ field }}
+
+            {% if field.help_text %}
+            <div class="text-xs text-gray-400 mt-1">{{ field.help_text }}</div>
+            {% endif %}
+
+            {% if field.errors %}
+            <p class="text-xs text-red-600 mt-1">{{ field.errors|join:", " }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <label class="flex items-center gap-2 text-sm text-gray-600">
+            <input type="checkbox" id="toggle-password" class="w-auto">
+            Show password
+        </label>
+
+        <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700">
+            Register
+        </button>
+    </form>
+
+    <p class="mt-4 text-sm text-center">
+        Already have an account?
+        <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Login here</a>
+    </p>
+</div>
+
+<script>
+    document.getElementById('toggle-password').addEventListener('change', function () {
+        const type = this.checked ? 'text' : 'password';
+        document.getElementById('id_password1').type = type;
+        document.getElementById('id_password2').type = type;
+    });
+</script>
+
+{% endblock %}

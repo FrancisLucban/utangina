@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold mb-4">Login</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <label class="flex items-center gap-2 text-sm text-gray-600 -mt-3 mb-4">
+            <input type="checkbox" id="toggle-password" class="w-auto">
+            Show password
+        </label>
+        <button type="submit" class="mt-2 bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700">
+            Login
+        </button>
+    </form>
+    <p class="mt-4 text-sm">No account? <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Register here</a></p>
+</div>
+
+<script>
+    document.getElementById('toggle-password').addEventListener('change', function () {
+        const passwordField = document.getElementById('id_password');
+        passwordField.type = this.checked ? 'text' : 'password';
+    });
+</script>
+{% endblock %}

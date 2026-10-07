@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}UT@NGINA - {{ user.username }}{% endblock %}
+{% block content %}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">
+        {% if filter_type == 'all' %}
+            Your Debts / Receivables
+        {% elif filter_type == 'owe' %}
+            Your Debts
+        {% elif filter_type == 'owed' %}
+            Your Receivables
+        {% elif filter_type == 'settled' %}
+            Settled Debts
+        {% else %}
+            Your Debts / Receivables
+        {% endif %}
+    </h1>
+    <a href="{% url 'debt_create' %}" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700">
+        + Add Debt
+    </a>
+</div>
+
+<!-- Totals summary -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <!-- First row -->
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-sm text-gray-500">You Owe</p>
+        <p class="text-2xl font-bold {% if total_owe > 0 %} text-red-600 {% else %} text-green-600 {% endif %}">₱{{ total_owe|intcomma }}</p>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-sm text-gray-500">Owed to You</p>
+        <p class="text-2xl font-bold text-green-600">₱{{ total_owed|intcomma }}</p>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-sm text-gray-500">Net Balance</p>
+        <p class="text-2xl font-bold {% if net_balance >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+            {% if net_balance >= 0 %}+{% endif %}₱{{ net_balance|intcomma }}
+        </p>
+    </div>
+    <!-- Second Row -->
+    <a href="{% url 'dashboard' %}?sort=due_date_asc" class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+        <p class="text-sm text-gray-500">Overdue</p>
+        <p class="text-2xl font-bold {% if overdue_count > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+            {{ overdue_count }}
+        </p>
+        {% if due_soon_count > 0 %}
+        <p class="text-xs text-yellow-600 mt-0.5">{{ due_soon_count }} due soon</p>
+        {% endif %}
+    </a>
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-sm text-gray-500">Active Debts</p>
+        <p class="text-2xl font-bold text-slate-800">{{ active_count }}</p>
+    </div>
+
+    <a href="{% url 'dashboard' %}?filter=settled" class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+        <p class="text-sm text-gray-500">Settled</p>
+        <p class="text-2xl font-bold text-green-600">{{ settled_count }}</p>
+    </a>
+</div>
+
+<!-- Search form -->
+<form method="get" class="mb-6">
+    {% if filter_type != 'all' %}
+        <input type="hidden" name="filter" value="{{ filter_type }}">
+    {% endif %}
+    <div class="flex gap-2">
+        <input
+            type="text"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Search by name or description..."
+            class="flex-1"
+        >
+        <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700">
+            Search
+        </button>
+        {% if search_query %}
+        <a href="?{% if filter_type != 'all' %}filter={{ filter_type }}{% endif %}{% if sort_by != 'date_desc' %}&sort={{ sort_by }}{% endif %}" class="px-4 py-2 rounded border hover:bg-gray-50">
+            Clear
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Filter tabs -->
+<div class="flex flex-wrap gap-2 mb-6 sm:flex-nowrap">
+    <a href="{% url 'dashboard' %}?filter=all{% if search_query %}&q={{ search_query }}{% endif %}"
+       class="px-4 py-2 rounded text-sm font-medium {% if filter_type == 'all' %}bg-slate-800 text-white{% else %}bg-white text-gray-600 border{% endif %}">
+        All
+    </a>
+    <a href="{% url 'dashboard' %}?filter=owe{% if search_query %}&q={{ search_query }}{% endif %}"
+       class="px-4 py-2 rounded text-sm font-medium {% if filter_type == 'owe' %}bg-slate-800 text-white{% else %}bg-white text-gray-600 border{% endif %}">
+        I Owe
+    </a>
+    <a href="{% url 'dashboard' %}?filter=owed{% if search_query %}&q={{ search_query }}{% endif %}"
+       class="px-4 py-2 rounded text-sm font-medium {% if filter_type == 'owed' %}bg-slate-800 text-white{% else %}bg-white text-gray-600 border{% endif %}">
+        Owed to Me
+    </a>
+    <a href="{% url 'dashboard' %}?filter=settled{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort_by }}"
+       class="px-4 py-2 rounded text-sm font-medium {% if filter_type == 'settled' %}bg-green-600 text-white{% else %}bg-white text-gray-600 border{% endif %}">
+        Settled
+    </a>
+
+    <!-- Sort dropdown -->
+    <form method="get" class="flex items-center gap-2 sm:ml-auto">
+        {% if filter_type != 'all' %}<input type="hidden" name="filter" value="{{ filter_type }}">{% endif %}
+        {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+        <label for="sort" class="text-sm text-gray-500 whitespace-nowrap">Sort by:</label>
+        <select name="sort" id="sort" onchange="this.form.submit()" class="text-sm">
+            <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (most recent)</option>
+            <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (oldest)</option>
+            <option value="due_date_asc" {% if sort_by == 'due_date_asc' %}selected{% endif %}>Due Date (Most Urgent)</option>
+            <option value="due_date_desc" {% if sort_by == 'due_date_desc' %}selected{% endif %}>Due Date (Least Urgent)</option>
+            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A–Z)</option>
+            <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name (Z–A)</option>
+            <option value="amount_desc" {% if sort_by == 'amount_desc' %}selected{% endif %}>Amount (highest)</option>
+            <option value="amount_asc" {% if sort_by == 'amount_asc' %}selected{% endif %}>Amount (lowest)</option>
+        </select>
+    </form>
+</div>
+
+<!-- Debts / Receivables Cards-->
+{% if debts %}
+<div class="space-y-3">
+    {% for debt in debts %}
+    <a href="{% url 'debt_detail' debt.pk %}" class="block bg-white p-4 rounded shadow hover:shadow-md">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="font-semibold">{{ debt.person_name }}</p>
+                <p class="text-gray-500">
+                    {% if debt.phone_number %}
+                        {{ debt.phone_number.as_international }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </p>
+                <p class="text-sm text-gray-500">
+                    {% if debt.debt_type == 'owe' %}You owe them{% else %}They owe you{% endif %}
+                    · {{ debt.date_set }}
+                </p>
+                {% if debt.is_overdue %}
+                <span class="inline-block mt-1 text-xs font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded">
+                    Overdue — {{ debt.due_date }}
+                </span>
+                {% elif debt.is_due_soon %}
+                <span class="inline-block mt-1 text-xs font-medium bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">
+                    Due soon — {{ debt.due_date }}
+                </span>
+                {% endif %}
+            </div>
+            <div class="text-right">
+                <p class="font-bold {% if debt.is_settled %}text-green-600{% else %}text-slate-800{% endif %}">
+                    ₱{{ debt.amount_remaining | intcomma }}
+                </p>
+                {% if debt.is_settled %}
+                    <span class="text-xs text-green-600">Settled</span>
+                {% else %}
+                    <span class="text-xs text-gray-400">of ₱{{ debt.amount | intcomma }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+    {% if search_query %}
+        <p class="text-gray-500">No debts found matching "{{ search_query }}".</p>
+    {% elif filter_type == 'settled' %}
+        <p class="text-gray-500">No settled debts yet.</p>
+    {% else %}
+        <p class="text-gray-500">No active debts found for this filter.</p>
+    {% endif %}
+{% endif %}
+
+<!-- Pagination -->
+{% if debts.paginator.num_pages > 1 %} <!-- hides one-page dashboards -->
+<div class="flex justify-between items-center mt-6">
+    {% if debts.has_previous %}
+        <a href="?page={{ debts.previous_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort_by }}"
+           class="px-4 py-2 rounded border hover:bg-gray-50 text-sm">
+            ← Previous
+        </a>
+    {% else %}
+        <span></span>
+    {% endif %}
+
+    <span class="text-sm text-gray-500">
+        Page {{ debts.number }} of {{ debts.paginator.num_pages }}
+    </span>
+
+    {% if debts.has_next %}
+        <a href="?page={{ debts.next_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort_by }}"
+           class="px-4 py-2 rounded border hover:bg-gray-50 text-sm">
+            Next →
+        </a>
+    {% else %}
+        <span></span>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ debt.person_name }}{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+    <a href="javascript:history.back()" class="px-4 py-2 rounded border hover:bg-gray-50 text-sm">
+        ← Back
+    </a>
+</div>
+
+<div class="bg-white p-6 rounded shadow mb-6">
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-2xl font-bold">{{ debt.person_name }}</h1>
+            <p class="text-gray-500">
+                {% if debt.phone_number %}
+                    {{ debt.phone_number.as_international }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+            <p class="text-gray-500">
+                {% if debt.debt_type == 'owe' %}You owe them{% else %}They owe you{% endif %}
+            </p>
+             <p class="text-sm text-gray-400 mt-1">Debt made on {{ debt.date_set }}</p>
+            {% if debt.description %}
+                <p class="text-sm text-gray-400 mt-1">{{ debt.description }}</p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'debt_edit' debt.pk %}" class="text-sm px-3 py-1 border rounded hover:bg-gray-50">Edit</a>
+            <a href="{% url 'debt_delete' debt.pk %}" class="text-sm px-3 py-1 border border-red-300 text-red-600 rounded hover:bg-red-50">Delete</a>
+        </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+        <div>
+            <p class="text-sm text-gray-400">Total</p>
+            <p class="font-bold">₱{{ debt.amount|intcomma }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-400">Remaining</p>
+            <p class="font-bold {% if debt.is_settled %}text-green-600{% endif %}">₱{{ debt.amount_remaining|intcomma }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-400">Status</p>
+            <p class="font-bold">{% if debt.is_settled %}Settled{% else %}Active{% endif %}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Due date warning -->
+{% if debt.due_date %}
+<div class="mt-4 text-center">
+    {% if debt.is_overdue %}
+        <span class="inline-block text-sm font-medium bg-red-100 text-red-700 px-3 py-1 rounded">
+            Overdue since {{ debt.due_date }}
+        </span>
+    {% elif debt.is_due_soon %}
+        <span class="inline-block text-sm font-medium bg-yellow-100 text-yellow-700 px-3 py-1 rounded">
+            Due soon — {{ debt.due_date }}
+        </span>
+    {% else %}
+        <span class="text-sm text-gray-400">Due {{ debt.due_date }}</span>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Input payment -->
+{% if not debt.is_settled %}
+<div class="bg-white p-6 rounded shadow mb-6 mt-6">
+    <h2 class="font-bold mb-3">Record a Payment</h2>
+    <form method="post" class="sm:flex gap-2 items-start">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700 mt-[26px]">
+            Add
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<!-- Payment history -->
+<div class="bg-white p-6 rounded shadow">
+    <h2 class="font-bold mb-3">Payment History</h2>
+    {% if payments %}
+    <ul class="divide-y">
+        {% for payment in payments %}
+        <li class="py-2 flex justify-between">
+            <span>{{ payment.date_paid }} {% if payment.note %}— {{ payment.note }}{% endif %}</span>
+            <span class="font-semibold">₱{{ payment.amount|intcomma }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-gray-500 text-sm">No payments recorded yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

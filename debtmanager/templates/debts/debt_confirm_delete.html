@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Delete Debt{% endblock %}
+{% block content %}
+
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold mb-4">Delete this debt?</h1>
+    <p class="mb-4 text-gray-600">
+        This will permanently delete "{{ debt.person_name }}" ({{ debt.amount }}) and all its payment history.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="flex gap-2">
+            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Yes, delete
+            </button>
+            <a href="{% url 'dashboard' %}" class="px-4 py-2 rounded border hover:bg-gray-50">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
