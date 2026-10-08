@@ -6,12 +6,12 @@ A personal project created for my circle to simply keep track of who owes who, b
 
 ## Features
 
-- **Accounts** — register, log in, log out, with a custom UUID-based user model
-- **Debt tracking** — log debts in either direction, with an optional due date, phone number, and description
-- **Partial payments** — record payments against a debt and watch the remaining balance update automatically; debts settle themselves once fully paid
-- **Dashboard** — search, filter (active / I owe / owed to me / settled), sort (date, due date, name, amount), and paginate
-- **At-a-glance totals** — total owed, total receivable, net balance, and an overdue count
-- **Soft delete** — deleted debts and payments are recoverable from the Django admin, never actually gone
+- **Accounts** - register, log in, log out, with a custom UUID-based user model
+- **Debt tracking** - log debts in either direction, with an optional due date, phone number, and description
+- **Partial payments** - record payments against a debt and watch the remaining balance update automatically; debts settle themselves once fully paid
+- **Dashboard** - search, filter (active / I owe / owed to me / settled), sort (date, due date, name, amount), and paginate
+- **At-a-glance totals** - total owed, total receivable, net balance, and an overdue count
+- **Soft delete** - deleted debts and payments are recoverable from the Django admin, never actually gone
 - **Toast notifications** for every meaningful action
 - **Responsive UI** styled with Tailwind CSS
 
@@ -37,7 +37,7 @@ A personal project created for my circle to simply keep track of who owes who, b
 
 ```bash
 # Clone and enter the project
-git clone https://github.com/<your-username>/debt-manager.git
+git clone https://github.com/<your-username>/utangina.git
 cd debt-manager/debtmanager
 
 # Python environment
