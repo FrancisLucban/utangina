@@ -22,11 +22,16 @@ class DebtAdmin(admin.ModelAdmin):
         # Use all_objects so deleted rows are visible in admin (needed to restore them)
         return Debt.all_objects.all()
 
-    @admin.action(description="Restore selected debts")
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop('delete_selected', None) # removes built-in delete action
+        return actions
+
+    @admin.action(description="Restore selected debts", permissions=['change'])
     def restore_selected(self, request, queryset):
         queryset.update(is_deleted=False, deleted_at=None)
 
-    @admin.action(description="Permanently delete selected debts")
+    @admin.action(description="Permanently delete selected debts", permissions=['delete'])
     def hard_delete_selected(self, request, queryset):
         for debt in queryset:
             debt.hard_delete()
