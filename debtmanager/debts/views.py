@@ -144,12 +144,12 @@ def debt_detail(request, pk):
             payment.debt = debt
             payment.save()
 
-            if debt.amount_remaining <= 0:
-                debt.is_settled = True
-                debt.save()
-                messages.success(request, f'Payment recorded! {debt.person_name}\'s debt is now fully settled!')
+            debt.save() # recomputes is_settled automatically via the model override
+
+            if debt.is_settled:
+                messages.success(request, f"Payment recorded. {debt.person_name}\'s debt is now fully settled!")
             else:
-                messages.success(request, 'Payment recorded!')
+                messages.success(request, "Payment recorded.")
 
             return redirect('debt_detail', pk=debt.pk)
     else:

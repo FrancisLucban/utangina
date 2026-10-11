@@ -58,10 +58,17 @@ class Debt(SoftDeleteModel):
     def __str__(self):
         return f"{self.person_name} - {self.amount}"
 
+    def _total_paid(self):
+        return sum(p.amount for p in self.payments.all())
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:   # only recompute for an existing debt, not a brand-new one
+            self.is_settled = (self.amount - self._total_paid()) <= 0
+        super().save(*args, **kwargs)
+
     @property
     def amount_remaining(self):
-        paid = sum(p.amount for p in self.payments.all())
-        return self.amount - paid
+        return self.amount - self._total_paid()
 
     @property
     def is_overdue(self):
