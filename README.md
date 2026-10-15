@@ -1,6 +1,8 @@
 # UT@NGINA
 
-*Because apparently our friend group needed financial stability*
+
+
+*Because apparently our friend group needed financial stability* 
 
 A personal project created for my circle to simply keep track of who owes who, built with Django and PostgreSQL.
 
